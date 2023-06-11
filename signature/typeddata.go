@@ -5,15 +5,16 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/signer/core"
-	"github.com/ethersphere/bee/pkg/crypto/eip712"
-	"golang.org/x/crypto/sha3"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+	"github.com/ethersphere/bee/pkg/crypto/eip712"
+	"golang.org/x/crypto/sha3"
 )
 
 var typedDataReferenceTypeRegexp = regexp.MustCompile(`^[A-Z](\w*)(\[\])?$`)
@@ -197,11 +198,12 @@ func Validate(typedData *eip712.TypedData) error {
 	if err := TypesValidate(typedData.Types); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 // TypesValidate checks if the types object is conformant to the specs
-func TypesValidate(t core.Types) error {
+func TypesValidate(t apitypes.Types) error {
 	for typeKey, typeArr := range t {
 		if len(typeKey) == 0 {
 			return fmt.Errorf("empty type key")
@@ -231,7 +233,7 @@ func TypesValidate(t core.Types) error {
 	return nil
 }
 
-func isReferenceType(t *core.Type) bool {
+func isReferenceType(t *apitypes.Type) bool {
 	if len(t.Type) == 0 {
 		return false
 	}
@@ -241,7 +243,7 @@ func isReferenceType(t *core.Type) bool {
 
 // typeName returns the canonical name of the type. If the type is 'Person[]', then
 // this method returns 'Person'
-func typeName(t *core.Type) string {
+func typeName(t *apitypes.Type) string {
 	if strings.HasSuffix(t.Type, "[]") {
 		return strings.TrimSuffix(t.Type, "[]")
 	}
